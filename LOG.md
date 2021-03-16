@@ -5,3 +5,6 @@
 * colab 에서 local jupyter로 변경
 * pytorch 환경 구성
 * cartpole 예제 실습 [링크](sample/cartpole_cnn)
+
+## 2021-03-16
+* 렌더링 결과 비디오 저장 템플릿 [링크](sample/save_as_mp4)
