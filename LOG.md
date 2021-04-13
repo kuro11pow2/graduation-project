@@ -13,3 +13,6 @@
 ## 2021-03-19
 * python 3.8로 변경
 * numpy, pandas 복습
+
+## 2021-04-13
+* mountaincar 예제 실습 [링크](sample/mountaincar_modified)
