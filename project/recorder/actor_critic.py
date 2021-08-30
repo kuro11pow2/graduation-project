@@ -1,9 +1,7 @@
-
 import torch    # pytorch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.distributions import Categorical
 
 # Hyperparameters
 learning_rate = 0.0002
@@ -72,7 +70,7 @@ class ActorCritic(nn.Module):
         pi = self.pi(s, softmax_dim=1)
         pi_a = pi.gather(1,a)
         # detach() 메소드는 원본 tensor에서 gradient 전파를 방지하는 tensor를 생성한다.
-        # storage를 공유하기 때문에 원본 tensor가 변하면 같이 바뀐다.
+        # 단, storage를 공유하기 때문에 원본 tensor가 변하면 같이 바뀐다.
         loss = -torch.log(pi_a) * delta.detach() + F.smooth_l1_loss(self.v(s), td_target.detach())
 
         self.optimizer.zero_grad()
