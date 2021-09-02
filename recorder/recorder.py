@@ -15,6 +15,9 @@ class Recorder:
 
     def wrapped_env(self):
         return self._env
+    
+    def recorded_epi(self):
+        return self._n_epi_set
 
     def _disable_window_classic_control(self):
         from gym.envs.classic_control import rendering
