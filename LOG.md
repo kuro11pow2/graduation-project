@@ -22,3 +22,12 @@
 
 ## 2021-05-24
 * lunarlander 예제 실습 [링크](sample/lunarlander_ppo)
+
+## 2021-08-24
+* env 녹화를 돕는 recorder 클래스 생성
+
+## 2021-09-01
+* ddqn 구현 업로드
+
+## 2021-0904
+* ppo 구현 업로드
