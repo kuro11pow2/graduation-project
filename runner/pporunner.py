@@ -1,5 +1,5 @@
 
-from runner import Runner
+from runner import *
 
 import torch
 import torch.nn as nn
@@ -10,8 +10,8 @@ from ppo import PPO
 from torch.distributions import Categorical
 
 class PPORunner(Runner):
-    def __init__(self, env_name, max_episode=10000, print_interval=20, max_video=3, record_baseline=None, reward_scale=None):
-        super(PPORunner, self).__init__(env_name, max_episode, print_interval, max_video, record_baseline, reward_scale)
+    def __init__(self, runner_params):
+        super(PPORunner, self).__init__(runner_params)
 
     def _episode_prepare(self):
         n_state = self._env.observation_space.shape[0]
@@ -30,13 +30,28 @@ class PPORunner(Runner):
                 a = m.sample().item()
                 s_prime, r, done, info = self._env.step(a)
                 
-                self._model.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), done))
+                if self._train:
+                    self._model.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), done))
+                    
                 s = s_prime
 
                 self._score += r
                 if done:
                     break
 
-            self._model.train_net()
+            if self._train:
+                self._model.train_net()
 
-    
+    def _save(self, path='./weights'):
+        import time, os
+        name = self._save_name if self._save_name else (str(int(time.time())) + '.pt')
+        try:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            torch.save(self._model.state_dict(), path + '/ppo-' + self._env_name + '-' + name)
+        except OSError:
+            raise
+
+    def _load(self, path='./weights'):
+        self._model.load_state_dict(torch.load(path + '/' + self._load_name))
+        self._model.eval()
