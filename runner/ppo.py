@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 class PPO(nn.Module):
-    def __init__(self, n_state, n_action, n_node=256, learning_rate=0.0001, gamma=0.98, lmbda=0.95, eps_clip=0.1, k_epoch=3, t_horizon=20):
+    def __init__(self, n_state, n_action, n_node=128, learning_rate=0.0001, gamma=0.98, lmbda=0.95, eps_clip=0.1, k_epoch=3, t_horizon=20):
         super(PPO, self).__init__()
         self.n_state = n_state
         self.n_action = n_action
