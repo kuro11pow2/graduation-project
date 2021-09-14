@@ -1,5 +1,5 @@
 
-from runner import *
+from runner import Runner, RunnerParams
 
 import torch
 import torch.nn as nn
