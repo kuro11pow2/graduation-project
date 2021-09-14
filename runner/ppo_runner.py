@@ -2,16 +2,13 @@
 from runner import Runner, RunnerParams
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 
 from algorithms.ppo import PPO
 from torch.distributions import Categorical
 
 class PPORunner(Runner):
-    def __init__(self, runner_params):
-        super(PPORunner, self).__init__(runner_params)
+    def __init__(self, env_name, runner_params):
+        super(PPORunner, self).__init__(env_name, 'PPO', runner_params)
 
     def _episode_prepare(self):
         n_state = self._env.observation_space.shape[0]
