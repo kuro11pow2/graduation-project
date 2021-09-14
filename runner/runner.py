@@ -38,6 +38,7 @@ class Runner(metaclass=ABCMeta):
         self._max_video = runner_params.max_video
         self._record_baseline = runner_params.record_baseline
         self._reward_scale = runner_params.reward_scale
+        self._score = 0.0
         self._env = None
         self._recorder = None
         self._writer = None
@@ -74,31 +75,39 @@ class Runner(metaclass=ABCMeta):
         self._writer.close()
 
     def _episode_loop(self):
+        print('초기 설정 시작')
         self._episode_prepare()
+
         if self._load_model:
+            print('모델 로딩 시작')
             self._load()
-        for n_epi in range(self._max_episode):
+
+        print('시뮬레이션 시작')
+        for n_epi in range(1, self._max_episode+1):
+            # 마지막 비디오가 정상적으로 녹화되려면 반드시 다음 episode를 돌려야 함.
             self._episode_sim()
-            self._record_video(n_epi)
-            self._print_log(n_epi)
             if self._stop:
                 break
+            if n_epi % self._print_interval == 0:
+                self._record_video(n_epi)
+                self._print_log(n_epi)
+                self._score = 0.0
+        print('시뮬레이션 종료')
+
         if self._save_model:
+            print('모델 저장 시작')
             self._save()
 
     def _record_video(self, n_epi):
-        if n_epi % self._print_interval==0 and n_epi!=0:
-            if self._score / self._print_interval > self._record_baseline:
-                self._recorder.add_epi([n_epi + 1])
-                if (len(self._recorder.recorded_epi()) >= self._max_video):
-                    self._env.reset()
-                    self._stop = True
+        if self._score / self._print_interval > self._record_baseline:
+            self._recorder.add_epi([n_epi])
+            print(f'{n_epi=} 비디오 저장')
+            if (len(self._recorder.recorded_epi()) >= self._max_video):
+                self._stop = True
     
     def _print_log(self, n_epi):
-        if n_epi % self._print_interval==0 and n_epi!=0:
-            print("# of episode: {}, avg score: {:.1f}".format(n_epi, self._score/self._print_interval))
-            self._writer.add_scalar("score/train", self._score/self._print_interval, n_epi)
-            self._score = 0.0
+        print("# of episode: {}, avg score: {:.1f}".format(n_epi, self._score/self._print_interval))
+        self._writer.add_scalar("score/train", self._score/self._print_interval, n_epi)
 
     def _save(self, path='./weights'):
         import time, os

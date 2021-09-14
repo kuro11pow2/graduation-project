@@ -38,6 +38,5 @@ class PPORunner(Runner):
                 self._score += r
                 if done:
                     break
-
             if self._train:
                 self._model.train_net()
