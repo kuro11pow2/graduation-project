@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from ppo import PPO
+from algorithms.ppo import PPO
 from torch.distributions import Categorical
 
 class PPORunner(Runner):
