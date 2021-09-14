@@ -41,17 +41,3 @@ class PPORunner(Runner):
 
             if self._train:
                 self._model.train_net()
-
-    def _save(self, path='./weights'):
-        import time, os
-        name = self._save_name if self._save_name else (str(int(time.time())) + '.pt')
-        try:
-            if not os.path.exists(path):
-                os.makedirs(path)
-            torch.save(self._model.state_dict(), path + '/ppo-' + self._env_name + '-' + name)
-        except OSError:
-            raise
-
-    def _load(self, path='./weights'):
-        self._model.load_state_dict(torch.load(path + '/' + self._load_name))
-        self._model.eval()

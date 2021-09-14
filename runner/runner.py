@@ -8,6 +8,7 @@ from abc import *
 import gym
 from recorder import Recorder
 from torch.utils.tensorboard import SummaryWriter
+import torch
 
 class RunnerParams:
     def __init__(self, env_name, *, save_model=False, save_name=None, load_model=False, load_name=None, train=True, 
@@ -99,6 +100,20 @@ class Runner(metaclass=ABCMeta):
             self._writer.add_scalar("score/train", self._score/self._print_interval, n_epi)
             self._score = 0.0
 
+    def _save(self, path='./weights'):
+        import time, os
+        name = self._save_name if self._save_name else (str(int(time.time())) + '.pt')
+        try:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            torch.save(self._model.state_dict(), path + '/ppo-' + self._env_name + '-' + name)
+        except OSError:
+            raise
+
+    def _load(self, path='./weights'):
+        self._model.load_state_dict(torch.load(path + '/' + self._load_name))
+        self._model.eval()
+
     @abstractmethod
     def _episode_prepare(self):
         pass
@@ -107,11 +122,3 @@ class Runner(metaclass=ABCMeta):
     def _episode_sim(self):
         pass
 
-    @abstractmethod
-    def _save(self, path):
-        pass
-
-    @abstractmethod
-    def _load(self, path, name):
-        pass
-    
