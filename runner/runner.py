@@ -7,11 +7,11 @@ from torch.utils.tensorboard import SummaryWriter
 import torch
 
 class RunnerParams:
-    def __init__(self, *, save_model=False, save_name=None, load_model=False, load_name=None, train=True, 
+    def __init__(self, *, save_net=False, save_name=None, load_net=False, load_name=None, train=True, 
                     max_episode=10000, print_interval=20, max_video=3, record_baseline=100, reward_scale=1.0, step_wrapper=lambda x: x):
-        self.save_model = save_model
+        self.save_net = save_net
         self.save_name = save_name
-        self.load_model = load_model
+        self.load_net = load_net
         self.load_name = load_name
         self.train = train
         self.max_episode = max_episode
@@ -26,9 +26,9 @@ class Runner(metaclass=ABCMeta):
         self._env_name = env_name
         self._algo_name = algo_name
         self._algo_params = algo_params
-        self._save_model = runner_params.save_model
+        self._save_net = runner_params.save_net
         self._save_name = runner_params.save_name
-        self._load_model = runner_params.load_model
+        self._load_net = runner_params.load_net
         self._load_name = runner_params.load_name
         self._train = runner_params.train
         self._max_episode = runner_params.max_episode
@@ -63,8 +63,8 @@ class Runner(metaclass=ABCMeta):
         print(f'state space: {self._env.observation_space.shape}')
         print(f'action space: {self._env.action_space}')
 
-        if self._load_model:
-            print('모델 로딩 시작')
+        if self._load_net:
+            print('네트워크 로딩 시작')
             self._load()
 
         print('시뮬레이션 시작')
@@ -79,8 +79,8 @@ class Runner(metaclass=ABCMeta):
                 self._score = 0.0
         print('시뮬레이션 종료')
 
-        if self._save_model:
-            print('모델 저장 시작')
+        if self._save_net:
+            print('네트워크 저장 시작')
             self._save()
 
     def _record_video(self, n_epi):
@@ -100,13 +100,13 @@ class Runner(metaclass=ABCMeta):
         try:
             if not os.path.exists(path):
                 os.makedirs(path)
-            torch.save(self._model.state_dict(), path + '/' + self._algo_name + '-' + self._env_name + '-' + name)
+            torch.save(self._net.state_dict(), path + '/' + self._algo_name + '-' + self._env_name + '-' + name)
         except OSError:
             raise
 
     def _load(self, path='./weights'):
-        self._model.load_state_dict(torch.load(path + '/' + self._load_name))
-        self._model.eval()
+        self._net.load_state_dict(torch.load(path + '/' + self._load_name))
+        self._net.eval()
 
     @abstractmethod
     def _episode_prepare(self):
