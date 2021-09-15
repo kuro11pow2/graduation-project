@@ -1,9 +1,12 @@
+import sys, os
+ppath = lambda x: os.path.dirname(os.path.abspath(x))
+sys.path.append(ppath(__file__))
 
 from runner import Runner, RunnerParams
 
 import torch
 
-from algorithms.ppo import PPO
+from ppo import PPO
 from torch.distributions import Categorical
 
 class PPORunner(Runner):
