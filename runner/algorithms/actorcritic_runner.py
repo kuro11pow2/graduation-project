@@ -1,19 +1,22 @@
+import sys, os
+ppath = lambda x: os.path.dirname(os.path.abspath(x))
+sys.path.append(ppath(__file__))
 
 from runner import Runner, RunnerParams
 
 import torch
 
-from algorithms.actorcritic import ActorCritic
+from actorcritic import ActorCritic
 from torch.distributions import Categorical
 
 class ActorCriticRunner(Runner):
-    def __init__(self, env_name, runner_params):
-        super(ActorCriticRunner, self).__init__(env_name, 'ActorCritic', runner_params)
+    def __init__(self, env_name, algo_params, runner_params):
+        super(ActorCriticRunner, self).__init__(env_name, 'ActorCritic', algo_params, runner_params)
 
     def _episode_prepare(self):
         n_state = self._env.observation_space.shape[0]
         n_action = self._env.action_space.n
-        self._model = ActorCritic(n_state, n_action)
+        self._model = ActorCritic(n_state, n_action, self._algo_params)
         self._score = 0.0
         self._print_interval = 20
 
