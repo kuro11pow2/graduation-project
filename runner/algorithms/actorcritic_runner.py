@@ -28,7 +28,7 @@ class ActorCriticRunner(Runner):
                 prob = self._model.pi(torch.from_numpy(s).float())
                 m = Categorical(prob)
                 a = m.sample().item()
-                s_prime, r, done, info = self._env.step(a)
+                s_prime, r, done, info = self._step_wrapper(self._env.step(a))
 
                 if self._train:
                     self._model.put_data((s,a,r/self._reward_scale,s_prime,done))

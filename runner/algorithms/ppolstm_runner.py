@@ -32,7 +32,7 @@ class PPOlstmRunner(Runner):
                 prob = prob.view(-1)
                 m = Categorical(prob)
                 a = m.sample().item()
-                s_prime, r, done, info = self._env.step(a)
+                s_prime, r, done, info = self._step_wrapper(self._env.step(a))
 
                 if self._train:
                     self._model.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), h_in, h_out, done))

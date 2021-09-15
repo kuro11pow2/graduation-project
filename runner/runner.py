@@ -8,7 +8,7 @@ import torch
 
 class RunnerParams:
     def __init__(self, *, save_model=False, save_name=None, load_model=False, load_name=None, train=True, 
-                    max_episode=10000, print_interval=20, max_video=3, record_baseline=100, reward_scale=1.0):
+                    max_episode=10000, print_interval=20, max_video=3, record_baseline=100, reward_scale=1.0, step_wrapper=lambda x: x):
         self.save_model = save_model
         self.save_name = save_name
         self.load_model = load_model
@@ -19,6 +19,7 @@ class RunnerParams:
         self.max_video = max_video
         self.record_baseline = record_baseline
         self.reward_scale = reward_scale
+        self.step_wrapper = step_wrapper
 
 class Runner(metaclass=ABCMeta):
     def __init__(self, env_name, algo_name, algo_params, runner_params):
@@ -35,6 +36,7 @@ class Runner(metaclass=ABCMeta):
         self._max_video = runner_params.max_video
         self._record_baseline = runner_params.record_baseline
         self._reward_scale = runner_params.reward_scale
+        self._step_wrapper = runner_params.step_wrapper
         self._score = 0.0
         self._env = None
         self._recorder = None
