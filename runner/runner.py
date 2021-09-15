@@ -77,6 +77,10 @@ class Runner(metaclass=ABCMeta):
     def _episode_loop(self):
         print('초기 설정 시작')
         self._episode_prepare()
+        print(f'algorithm: {self._algo_name}')
+        print(f'env: {self._env_name}')
+        print(f'state space: {self._env.observation_space.shape}')
+        print(f'action space: {self._env.action_space}')
 
         if self._load_model:
             print('모델 로딩 시작')
