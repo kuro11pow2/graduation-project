@@ -20,7 +20,7 @@ class PPO(nn.Module):
         self.fc1   = nn.Linear(self.n_state, self.n_node)
         self.fc_pi = nn.Linear(self.n_node, self.n_action)
         self.fc_v  = nn.Linear(self.n_node, 1)
-        self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
+        self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def pi(self, x, softmax_dim=0):
         x = F.relu(self.fc1(x))
