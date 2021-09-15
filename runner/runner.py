@@ -1,7 +1,3 @@
-# import sys, os
-# ppath = lambda x: os.path.dirname(os.path.abspath(x))
-# file_name = os.getcwd()
-# sys.path.append(ppath(file_name))
 
 from abc import *
 
@@ -12,7 +8,7 @@ import torch
 
 class RunnerParams:
     def __init__(self, *, save_model=False, save_name=None, load_model=False, load_name=None, train=True, 
-                    max_episode=10000, print_interval=20, max_video=3, record_baseline=None, reward_scale=None):
+                    max_episode=10000, print_interval=20, max_video=3, record_baseline=100, reward_scale=1.0):
         self.save_model = save_model
         self.save_name = save_name
         self.load_model = load_model
@@ -25,9 +21,10 @@ class RunnerParams:
         self.reward_scale = reward_scale
 
 class Runner(metaclass=ABCMeta):
-    def __init__(self, env_name, algo_name, runner_params):
+    def __init__(self, env_name, algo_name, algo_params, runner_params):
         self._env_name = env_name
         self._algo_name = algo_name
+        self._algo_params = algo_params
         self._save_model = runner_params.save_model
         self._save_name = runner_params.save_name
         self._load_model = runner_params.load_model
@@ -43,24 +40,6 @@ class Runner(metaclass=ABCMeta):
         self._recorder = None
         self._writer = None
         self._stop = False
-        self._set_constant()
-    
-    def _set_constant(self):
-        if not self._record_baseline:
-            tmp = None
-            if self._env_name == 'LunarLander-v2':
-                tmp = 100
-            elif self._env_name == 'CartPole-v1':
-                tmp = 300
-            self._record_baseline = tmp
-
-        if not self._reward_scale:
-            tmp = None
-            if self._env_name == 'LunarLander-v2':
-                tmp = 20.0
-            elif self._env_name == 'CartPole-v1':
-                tmp = 100.0
-            self._reward_scale = tmp
         
     def run(self):
         env = gym.make(self._env_name)
