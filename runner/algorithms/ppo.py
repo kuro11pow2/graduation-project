@@ -3,11 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-class PPO(nn.Module):
-    def __init__(self, n_state, n_action, n_node=128, learning_rate=0.0001, gamma=0.98, lmbda=0.95, eps_clip=0.1, k_epoch=3, t_horizon=20):
-        super(PPO, self).__init__()
-        self.n_state = n_state
-        self.n_action = n_action
+class PPOParams:
+    def __init__(self, *, n_node=128, learning_rate=0.0001, gamma=0.98, lmbda=0.95, eps_clip=0.1, k_epoch=3, t_horizon=20):
         self.n_node = n_node
         self.learning_rate = learning_rate
         self.gamma = gamma
@@ -15,6 +12,19 @@ class PPO(nn.Module):
         self.eps_clip = eps_clip
         self.k_epoch = k_epoch
         self.t_horizon = t_horizon
+
+class PPO(nn.Module):
+    def __init__(self, n_state, n_action, params):
+        super(PPO, self).__init__()
+        self.n_state = n_state
+        self.n_action = n_action
+        self.n_node = params.n_node
+        self.learning_rate = params.learning_rate
+        self.gamma = params.gamma
+        self.lmbda = params.lmbda
+        self.eps_clip = params.eps_clip
+        self.k_epoch = params.k_epoch
+        self.t_horizon = params.t_horizon
         self.data = []
         
         self.fc1   = nn.Linear(self.n_state, self.n_node)

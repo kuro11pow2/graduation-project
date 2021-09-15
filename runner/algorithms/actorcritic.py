@@ -3,15 +3,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-class ActorCritic(nn.Module):
-    def __init__(self, n_state, n_action, n_node=256, learning_rate=0.0002, gamma=0.98, n_rollout=10):
-        super(ActorCritic, self).__init__()
-        self.n_state = n_state
-        self.n_action = n_action
+class ActorCriticParams:
+    def __init__(self, *, n_node=256, learning_rate=0.0002, gamma=0.98, n_rollout=10):
         self.n_node = n_node
         self.learning_rate = learning_rate
         self.gamma = gamma
         self.n_rollout = n_rollout
+
+class ActorCritic(nn.Module):
+    def __init__(self, n_state, n_action, params):
+        super(ActorCritic, self).__init__()
+        self.n_state = n_state
+        self.n_action = n_action
+        self.n_node = params.n_node
+        self.learning_rate = params.learning_rate
+        self.gamma = params.gamma
+        self.n_rollout = params.n_rollout
         self.data = []
 
         self.fc1 = nn.Linear(self.n_state,self.n_node) 

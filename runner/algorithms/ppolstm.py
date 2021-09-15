@@ -3,11 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-class PPOlstm(nn.Module):
-    def __init__(self, n_state, n_action, n_node=64, learning_rate=0.0001, gamma=0.98, lmbda=0.95, eps_clip=0.1, k_epoch=3, t_horizon=20):
-        super(PPOlstm, self).__init__()
-        self.n_state = n_state
-        self.n_action = n_action
+class PPOlstmParams:
+    def __init__(self, *, n_node=64, learning_rate=0.0001, gamma=0.98, lmbda=0.95, eps_clip=0.1, k_epoch=3, t_horizon=20):
         self.n_node = n_node
         self.learning_rate = learning_rate
         self.gamma = gamma
@@ -15,13 +12,26 @@ class PPOlstm(nn.Module):
         self.eps_clip = eps_clip
         self.k_epoch = k_epoch
         self.t_horizon = t_horizon
+
+class PPOlstm(nn.Module):
+    def __init__(self, n_state, n_action, params):
+        super(PPOlstm, self).__init__()
+        self.n_state = n_state
+        self.n_action = n_action
+        self.n_node = params.n_node
+        self.learning_rate = params.learning_rate
+        self.gamma = params.gamma
+        self.lmbda = params.lmbda
+        self.eps_clip = params.eps_clip
+        self.k_epoch = params.k_epoch
+        self.t_horizon = params.t_horizon
         self.data = []
         
-        self.fc1   = nn.Linear(n_state, n_node)
-        self.lstm  = nn.LSTM(n_node, n_node//2)
-        self.fc_pi = nn.Linear(n_node//2, n_action)
-        self.fc_v  = nn.Linear(n_node//2, 1)
-        self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
+        self.fc1   = nn.Linear(n_state, self.n_node)
+        self.lstm  = nn.LSTM(self.n_node, self.n_node//2)
+        self.fc_pi = nn.Linear(self.n_node//2, n_action)
+        self.fc_v  = nn.Linear(self.n_node//2, 1)
+        self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def pi(self, x, hidden):
         x = F.relu(self.fc1(x))

@@ -10,13 +10,13 @@ from ppo import PPO
 from torch.distributions import Categorical
 
 class PPORunner(Runner):
-    def __init__(self, env_name, runner_params):
-        super(PPORunner, self).__init__(env_name, 'PPO', runner_params)
+    def __init__(self, env_name, algo_params, runner_params):
+        super(PPORunner, self).__init__(env_name, 'PPO', algo_params, runner_params)
 
     def _episode_prepare(self):
         n_state = self._env.observation_space.shape[0]
         n_action = self._env.action_space.n
-        self._model = PPO(n_state, n_action)
+        self._model = PPO(n_state, n_action, self._algo_params)
         self._score = 0.0
         self._print_interval = 20
 

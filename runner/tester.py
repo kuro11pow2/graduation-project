@@ -2,10 +2,10 @@ from runner import Runner, RunnerParams
 from env import Env
 
 class RunnerTester:
-    def __init__(self, runner: Runner, algo_params, envs: list=[]):
+    def __init__(self, runner, algo_params, envs: list=None):
         self.target_runner = runner
         self.algo_params = algo_params
-        self.envs = envs if len(envs) else list(Env)
+        self.envs = envs if envs else list(Env)
 
     def test(self):
         """
@@ -18,10 +18,10 @@ class RunnerTester:
                     max_episode=2000, record_baseline=300, reward_scale=100.0, max_video=1)
             elif env_name == Env.MOUNTAINCAR:
                 runner_params = RunnerParams(train=True, save_model=True, \
-                    max_episode=2000, record_baseline=100, reward_scale=20.0, max_video=1)
+                    max_episode=2000, record_baseline=0, reward_scale=10.0, max_video=1)
             elif env_name == Env.LUNARLANDER:
                 runner_params = RunnerParams(train=True, save_model=True, \
-                    max_episode=2000, record_baseline=100, reward_scale=20.0, max_video=1)
+                    max_episode=2000, record_baseline=0, reward_scale=20.0, max_video=1)
             else:
                 continue
             runner = self.target_runner(env_name.value, self.algo_params, runner_params)
