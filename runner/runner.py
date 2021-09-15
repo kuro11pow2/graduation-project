@@ -7,8 +7,11 @@ from torch.utils.tensorboard import SummaryWriter
 import torch
 
 class RunnerParams:
-    def __init__(self, *, save_net=False, save_name=None, load_net=False, load_name=None, train=True, 
-                    max_episode=10000, print_interval=20, max_video=3, record_baseline=100, reward_scale=1.0, step_wrapper=lambda x: x):
+    def __init__(self, *, save_net=False, save_name=None, load_net=False, load_name=None, 
+                    train=True,  max_episode=10000, print_interval=20, 
+                    max_video=3, video_record_interval=0,
+                    target_score=0, record_baseline=100, 
+                    reward_scale=1.0, step_wrapper=lambda x: x):
         self.save_net = save_net
         self.save_name = save_name
         self.load_net = load_net
@@ -17,7 +20,9 @@ class RunnerParams:
         self.max_episode = max_episode
         self.print_interval = print_interval
         self.max_video = max_video
+        self.video_record_interval = video_record_interval
         self.record_baseline = record_baseline
+        self.target_score = target_score
         self.reward_scale = reward_scale
         self.step_wrapper = step_wrapper
 
@@ -34,7 +39,9 @@ class Runner(metaclass=ABCMeta):
         self._max_episode = runner_params.max_episode
         self._print_interval = runner_params.print_interval
         self._max_video = runner_params.max_video
+        self._video_record_interval = runner_params.video_record_interval
         self._record_baseline = runner_params.record_baseline
+        self._target_score = runner_params.target_score
         self._reward_scale = runner_params.reward_scale
         self._step_wrapper = runner_params.step_wrapper
         self._score = 0.0
@@ -70,11 +77,11 @@ class Runner(metaclass=ABCMeta):
         print('시뮬레이션 시작')
         for n_epi in range(1, self._max_episode+1):
             # 마지막 비디오가 정상적으로 녹화되려면 반드시 다음 episode를 돌려야 함.
-            self._episode_sim()
+            self._episode_sim(n_epi)
             if self._stop:
                 break
+            self._record_video(n_epi)
             if n_epi % self._print_interval == 0:
-                self._record_video(n_epi)
                 self._print_log(n_epi)
                 self._score = 0.0
         print('시뮬레이션 종료')
@@ -84,7 +91,10 @@ class Runner(metaclass=ABCMeta):
             self._save()
 
     def _record_video(self, n_epi):
-        if self._score / self._print_interval > self._record_baseline:
+        cond = self._video_record_interval and (n_epi % self._video_record_interval == 0)
+        aver_score = self._score / (n_epi % self._print_interval if n_epi % self._print_interval else self._print_interval)
+        cond = cond or aver_score > self._record_baseline
+        if cond:
             self._recorder.add_epi([n_epi])
             print(f'{n_epi=} 비디오 저장')
             if (len(self._recorder.recorded_epi()) >= self._max_video):
@@ -93,6 +103,8 @@ class Runner(metaclass=ABCMeta):
     def _print_log(self, n_epi):
         print("# of episode: {}, avg score: {:.1f}".format(n_epi, self._score/self._print_interval))
         self._writer.add_scalar("score/train", self._score/self._print_interval, n_epi)
+        if (self._target_score <= self._score / self._print_interval):
+            self._stop = True
 
     def _save(self, path='./weights'):
         import time, os
@@ -113,6 +125,5 @@ class Runner(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _episode_sim(self):
+    def _episode_sim(self, n_epi):
         pass
-
