@@ -31,7 +31,6 @@ class PPORunner(Runner):
                     self._model.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), done))
                     
                 s = s_prime
-
                 self._score += r
                 if done:
                     break
