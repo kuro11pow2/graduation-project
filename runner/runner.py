@@ -96,7 +96,7 @@ class Runner(metaclass=ABCMeta):
         cond = cond or aver_score > self._record_baseline
         if cond:
             self._recorder.add_epi([n_epi])
-            print(f'{n_epi=} 비디오 저장')
+            print(f'{n_epi=}, {aver_score=} 비디오 저장')
             if (len(self._recorder.recorded_epi()) >= self._max_video):
                 self._stop = True
     
