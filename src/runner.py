@@ -2,7 +2,7 @@
 from abc import *
 
 import gym
-from recorder import Recorder
+import recorder 
 from torch.utils.tensorboard import SummaryWriter
 import torch
 
@@ -52,7 +52,7 @@ class Runner(metaclass=ABCMeta):
         
     def run(self):
         env = gym.make(self._env_name)
-        self._recorder = Recorder(env, False)
+        self._recorder = recorder.Recorder(env, False)
         self._env = self._recorder.wrapped_env()
         if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
             raise Exception('discrete space만 지원됨.')
