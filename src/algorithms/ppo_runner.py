@@ -20,7 +20,7 @@ class PPORunner(Runner):
         self._score = 0.0
         self._print_interval = 20
 
-    def _episode_sim(self):
+    def _episode_sim(self, n_epi):
         s = self._env.reset()
         done = False
         while not done:

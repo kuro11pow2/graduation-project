@@ -20,7 +20,7 @@ class PPOlstmRunner(Runner):
         self._score = 0.0
         self._print_interval = 20
 
-    def _episode_sim(self):
+    def _episode_sim(self, n_epi):
         h_out = (torch.zeros([1, 1, self._net.n_node//2], dtype=torch.float), 
                 torch.zeros([1, 1, self._net.n_node//2], dtype=torch.float))
         s = self._env.reset()
