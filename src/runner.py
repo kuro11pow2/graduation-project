@@ -85,7 +85,7 @@ class Runner(metaclass=ABCMeta):
         print(f'action space: {self._env.action_space}')
 
         if self._load_net:
-            print('네트워크 로딩')
+            print('네트워크 불러오기')
             self._load()
 
         print('시뮬레이션 시작')
