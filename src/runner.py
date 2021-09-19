@@ -9,7 +9,7 @@ import torch
 
 class RunnerParams:
     def __init__(self, *, save_net=False, name_postfix=None, load_net=False, load_name=None, 
-                    train=True,  max_episode=10000, print_interval=20, 
+                    train=True,  max_episode=10000, interval=20, 
                     max_video=3, video_record_interval=0,
                     target_score=0, record_baseline=100, 
                     reward_scale=1.0, step_wrapper=lambda x: x):
@@ -19,7 +19,7 @@ class RunnerParams:
         self.load_name = load_name
         self.train = train
         self.max_episode = max_episode
-        self.print_interval = print_interval
+        self.interval = interval
         self.max_video = max_video
         self.video_record_interval = video_record_interval
         self.record_baseline = record_baseline
@@ -38,7 +38,7 @@ class Runner(metaclass=ABCMeta):
         self._load_name = runner_params.load_name
         self._train = runner_params.train
         self._max_episode = runner_params.max_episode
-        self._print_interval = runner_params.print_interval
+        self._interval = runner_params.interval
         self._max_video = runner_params.max_video
         self._video_record_interval = runner_params.video_record_interval
         self._record_baseline = runner_params.record_baseline
@@ -82,22 +82,25 @@ class Runner(metaclass=ABCMeta):
             self._load()
 
         print('시뮬레이션 시작')
-        for n_epi in range(1, self._max_episode+1):
-            # 마지막 비디오가 정상적으로 녹화되려면 반드시 다음 episode를 돌려야 함.
+        done = False
+        for n_epi in range(self._max_episode):
             self._episode_sim(n_epi)
+            done = self._is_done()
 
-            video_record = self._video_record_interval and (n_epi % self._video_record_interval == 0)
-            avg_score = self._score / (n_epi % self._print_interval if n_epi % self._print_interval else self._print_interval)
+            video_record = done
+            video_record = video_record or (self._video_record_interval and (n_epi % self._video_record_interval == 0))
+            avg_score = self._score / (n_epi % self._interval if n_epi % self._interval else self._interval)
             video_record = video_record or avg_score >= self._record_baseline
 
             if video_record:
                 self._record_video(n_epi, avg_score)
 
-            if n_epi % self._print_interval == 0:
+            if n_epi % self._interval == 0:
                 self._print_log(n_epi)
                 self._score = 0.0
-            
-            if self._is_done():
+
+            if done:
+                print(f'종료 조건 만족함. 최종 {self._interval}번 평균 점수 {avg_score}')
                 self._end_score = avg_score
                 break
 
@@ -109,14 +112,21 @@ class Runner(metaclass=ABCMeta):
 
     def _record_video(self, n_epi, avg_score):
         print(f'{n_epi=}, {avg_score=} 비디오 저장')
+        # name = f'{self._algo_name}'
+        # name += f'-{self._env_name}'
+        # name += f'-scr={avg_score}'
+        # name += f'-epi={n_epi}'
+        # if self._name_postfix:
+        #     name += f'-{self._name_postfix}'
+        # name += f'-{(str(int(time.time())))}'
         self._recorder.add_epi([n_epi])
         
     def _print_log(self, n_epi):
-        print(f"에피소드: {n_epi}, 평균 점수: {self._score/self._print_interval:.1f}")
-        self._writer.add_scalar("score/train", self._score/self._print_interval, n_epi)
+        print(f"에피소드: {n_epi}, 평균 점수: {self._score/self._interval:.1f}")
+        self._writer.add_scalar("score/train", self._score/self._interval, n_epi)
     
     def _is_done(self):
-        if (self._target_score <= self._score / self._print_interval):
+        if (self._target_score <= self._score / self._interval):
             return True
         elif (len(self._recorder.recorded_epi()) >= self._max_video):
             return True
@@ -134,7 +144,7 @@ class Runner(metaclass=ABCMeta):
             if self._name_postfix:
                 name += f'-{self._name_postfix}'
             name += f'-{(str(int(time.time())))}.pt'
-            torch.save(name)
+            torch.save(self._net.state_dict(), name)
         except OSError:
             raise
 
