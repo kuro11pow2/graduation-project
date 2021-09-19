@@ -17,6 +17,17 @@ class DQNParams:
         self.start_epsilon = start_epsilon
         self.update_interval = update_interval
 
+    def __str__(self):
+        s = ''
+        s += f'node={self.n_node}-'
+        s += f'lRate={self.learning_rate}-'
+        s += f'gma={self.gamma}-'
+        s += f'nBuf={self.buffer_limit}-'
+        s += f'nBat={self.batch_size}-'
+        s += f'nStrt={self.n_train_start}-'
+        s += f'updIntvl={self.update_interval}'
+        return s
+
 class DQN(nn.Module):
     def __init__(self, n_state, n_action, params):
         super(DQN, self).__init__()
