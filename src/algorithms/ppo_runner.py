@@ -18,7 +18,6 @@ class PPORunner(Runner):
         n_action = self._env.action_space.n
         self._net = PPO(n_state, n_action, self._algo_params)
         self._score = 0.0
-        self._print_interval = 20
 
     def _episode_sim(self, n_epi):
         s = self._env.reset()

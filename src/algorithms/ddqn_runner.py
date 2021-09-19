@@ -20,7 +20,6 @@ class DDQNRunner(Runner):
         self._target_net.load_state_dict(self._net.state_dict())
 
         self._score = 0.0
-        self._print_interval = 20
 
     def _episode_sim(self, n_epi):
         s = self._env.reset()

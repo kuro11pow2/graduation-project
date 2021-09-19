@@ -18,7 +18,6 @@ class PPOlstmRunner(Runner):
         n_action = self._env.action_space.n
         self._net = PPOlstm(n_state, n_action, self._algo_params)
         self._score = 0.0
-        self._print_interval = 20
 
     def _episode_sim(self, n_epi):
         h_out = (torch.zeros([1, 1, self._net.n_node//2], dtype=torch.float), 
