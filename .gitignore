@@ -1,6 +1,6 @@
 .ipynb_checkpoints/
-
-gym-results/
 __pycache__/
 
 runs/
+gym-results/
+videos/
