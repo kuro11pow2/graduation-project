@@ -1,23 +1,23 @@
 import gym
 
 class Recorder:
-    def __init__(self, env, result_window=True, save_dir="./gym-results"):
+    def __init__(self, env, result_window=True, save_dir="./videos"):
         self._epi_set = set()
-        self._env = gym.wrappers.Monitor(env, save_dir, force=True, video_callable=self._save_or_not)
+        self.n_recorded = 0
+        self.video_enable = False
+        self._env = gym.wrappers.Monitor(env, save_dir, force=True, video_callable=lambda x: self.video_enable)
         if not result_window:
             self._disable_window_classic_control()
-
-    def add_epi(self, _epi_num_it):
-        if hasattr(_epi_num_it, '__iter__') and all(map(lambda x : type(x) == type(int()), _epi_num_it)):
-            self._epi_set.update(_epi_num_it)
-        else:
-            raise Exception("Recorder에 잘못된 n_epi가 들어옴")
+    
+    def record_start(self):
+        self.n_recorded += 1
+        self.video_enable = True
+    
+    def record_end(self):
+        self.video_enable = False
 
     def wrapped_env(self):
         return self._env
-    
-    def recorded_epi(self):
-        return self._epi_set
 
     def _disable_window_classic_control(self):
         from gym.envs.classic_control import rendering
@@ -28,8 +28,5 @@ class Recorder:
             self.window.set_visible(visible=False)
 
         rendering.Viewer.__init__ = constructor
-        
-    def _save_or_not(self, n_epi):
-        return n_epi in self._epi_set
 
     
