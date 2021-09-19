@@ -12,6 +12,17 @@ class PPOParams:
         self.eps_clip = eps_clip
         self.k_epoch = k_epoch
         self.t_horizon = t_horizon
+    
+    def __str__(self):
+        s = ''
+        s += f'node={self.n_node}-'
+        s += f'lRate={self.learning_rate}-'
+        s += f'gma={self.gamma}-'
+        s += f'lmb={self.lmbda}-'
+        s += f'epsclp={self.eps_clip}-'
+        s += f'k={self.k_epoch}-'
+        s += f't={self.t_horizon}'
+        return s
 
 class PPO(nn.Module):
     def __init__(self, n_state, n_action, params):
