@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, time
 ppath = lambda x: os.path.dirname(os.path.abspath(x))
 sys.path.append(ppath(__file__))
 
@@ -21,7 +21,6 @@ class DQNRunner(Runner):
         self._target_net.load_state_dict(self._net.state_dict())
 
         self._score = 0.0
-        self._print_interval = 20
 
     def _episode_sim(self, n_epi):
         s = self._env.reset()
@@ -54,3 +53,9 @@ class DQNRunner(Runner):
         super()._print_log(n_epi)
         print(f"n_buffer : {self._net.buffer_size()}, "\
                     + f"eps : {self._net._epsilon*100:.1f}%")
+
+    def _load(self, path='./weights'):
+        self._net.load_state_dict(torch.load(path + '/' + self._load_name))
+        self._target_net.load_state_dict(torch.load(path + '/' + self._load_name))
+        self._net.eval()
+        self._target_net.eval()
