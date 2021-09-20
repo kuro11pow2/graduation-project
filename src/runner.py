@@ -138,21 +138,20 @@ class Runner(metaclass=ABCMeta):
         try:
             if not os.path.exists(path):
                 os.makedirs(path)
-            name = f'{path}/'
-            name += f'{self._algo_name}'
+            name = f'{self._algo_name}'
             name += f'-{self._env_name}'
             name += f'-{self._end_score}'
             name += f'-{str(self._runner_params)}'
             if self._name_postfix:
                 name += f'-{self._name_postfix}'
             name += f'-{(str(int(time.time())))}.pt'
-            torch.save(self._net.state_dict(), name)
+            self._net.save_net(path, name)
         except OSError:
             raise
-
+            
     def _load(self, path='./weights'):
-        self._net.load_state_dict(torch.load(path + '/' + self._load_name))
-        self._net.eval()
+        self._net.load_net(path, self._load_name)
+        self._net.set_eval()
 
     @abstractmethod
     def _episode_prepare(self):
