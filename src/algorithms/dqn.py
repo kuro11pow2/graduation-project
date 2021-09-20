@@ -28,21 +28,13 @@ class DQNParams:
         s += f'updIntvl={self.update_interval}'
         return s
 
-class DQN(nn.Module):
+class QNet(nn.Module):
     def __init__(self, n_state, n_action, params):
-        super(DQN, self).__init__()
+        super(QNet, self).__init__()
         self.n_state = n_state
         self.n_action = n_action
         self.n_node = params.n_node
         self.learning_rate = params.learning_rate
-        self.gamma = params.gamma
-        self.buffer_limit = params.buffer_limit
-        self.batch_size = params.batch_size
-        self.n_train_start = params.n_train_start
-        self.start_epsilon = params.start_epsilon
-        self.update_interval = params.update_interval
-
-        self.buffer = collections.deque(maxlen=self.buffer_limit)
 
         self.fc1 = nn.Linear(self.n_state, self.n_node)
         self.fc2 = nn.Linear(self.n_node, self.n_node)
@@ -63,11 +55,32 @@ class DQN(nn.Module):
         else : 
             return out.argmax().item()
 
-    def put(self, transition): # 버퍼에 데이터 뒤에 넣기 (크기가 초과되면 가장 앞 데이터가 제거됨)
-        self.buffer.append(transition)
+class DQN:
+    def __init__(self, n_state, n_action, params):
+        self.learning_rate = params.learning_rate
+        self.gamma = params.gamma
+        self.buffer_limit = params.buffer_limit
+        self.batch_size = params.batch_size
+        self.n_train_start = params.n_train_start
+        self.start_epsilon = params.start_epsilon
+        self.update_interval = params.update_interval
+
+        self.net = QNet(n_state, n_action, params)
+        self.target_net = QNet(n_state, n_action, params)
+        self.replay_buffer = collections.deque(maxlen=self.buffer_limit)
+    
+    def update_net(self):
+        self.target_net.load_state_dict(self.net.state_dict())
+
+    def append_data(self, transition):
+        """
+        replay buffer의 뒤에 transition 삽입
+        buffer_limit을 초과하면 FIFO로 동작
+        """
+        self.replay_buffer.append(transition)
     
     def sample(self, n):
-        mini_batch = random.sample(self.buffer, n) # 버퍼에서 n개 샘플링하여 미니 배치 만든다
+        mini_batch = random.sample(self.replay_buffer, n) # 버퍼에서 n개 샘플링하여 미니 배치 만든다
         s_lst, a_lst, r_lst, s_prime_lst, done_mask_lst = [], [], [], [], []
         
         for transition in mini_batch:
@@ -82,21 +95,43 @@ class DQN(nn.Module):
         return torch.tensor(s_lst, dtype=torch.float), torch.tensor(a_lst), \
                torch.tensor(r_lst, dtype=torch.float), torch.tensor(s_prime_lst, dtype=torch.float), \
                torch.tensor(done_mask_lst)
+
+    def sample_action(self, obs):
+        return self.net.sample_action(obs, self.epsilon)
     
     def buffer_size(self):
-        return len(self.buffer)
+        return len(self.replay_buffer)
                 
-    def train_net(self, target_net):
+    def train_net(self):
         for i in range(10):
             s,a,r,s_prime,done_mask = self.sample(self.batch_size)
 
-            q_out = self(s)
+            q_out = self.net(s)
             q_a = q_out.gather(1,a) 
 
-            max_q_prime = target_net(s_prime).max(1)[0].unsqueeze(1)
+            max_q_prime = self.target_net(s_prime).max(1)[0].unsqueeze(1)
             target = r + self.gamma * max_q_prime * done_mask
             loss = F.smooth_l1_loss(q_a, target)
             
-            self.optimizer.zero_grad()
+            self.net.optimizer.zero_grad()
             loss.backward()
-            self.optimizer.step()
+            self.net.optimizer.step()
+    
+    def save_net(self, dir, name):
+        torch.save({
+            'net': self.net.state_dict(),
+            'target_net': self.target_net.state_dict()
+        }, dir + '/' + name)
+
+    def load_net(self, dir, name):
+        checkpoint = torch.load(dir + '/' + name)
+        self.net.load_state_dict(checkpoint['net'])
+        self.target_net.load_state_dict(checkpoint['target_net'])
+    
+    def set_train(self):
+        self.net.train()
+        self.target_net.train()
+    
+    def set_eval(self):
+        self.net.eval()
+        self.target_net.eval()
