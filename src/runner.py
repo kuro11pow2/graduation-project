@@ -54,7 +54,7 @@ class Runner(metaclass=ABCMeta):
         self._score = 0.0
         self._end_score = None
         self._env = None
-        self._net = None
+        self._algo = None
         self._recorder = None
         self._writer = None
         
@@ -145,13 +145,13 @@ class Runner(metaclass=ABCMeta):
             if self._name_postfix:
                 name += f'-{self._name_postfix}'
             name += f'-{(str(int(time.time())))}.pt'
-            self._net.save_net(path, name)
+            self._algo.save_net(path, name)
         except OSError:
             raise
             
     def _load(self, path='./weights'):
-        self._net.load_net(path, self._load_name)
-        self._net.set_eval()
+        self._algo.load_net(path, self._load_name)
+        self._algo.set_eval()
 
     @abstractmethod
     def _episode_prepare(self):
