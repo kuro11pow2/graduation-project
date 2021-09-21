@@ -16,25 +16,25 @@ class PPORunner(Runner):
     def _episode_prepare(self):
         n_state = self._env.observation_space.shape[0]
         n_action = self._env.action_space.n
-        self._net = PPO(n_state, n_action, self._algo_params)
+        self._algo = PPO(n_state, n_action, self._algo_params)
         self._score = 0.0
 
     def _episode_sim(self, n_epi):
         s = self._env.reset()
         done = False
         while not done:
-            for t in range(self._net.t_horizon):
-                prob = self._net.pi(torch.from_numpy(s).float())
+            for t in range(self._algo.t_horizon):
+                prob = self._algo.pi(torch.from_numpy(s).float())
                 m = Categorical(prob)
                 a = m.sample().item()
                 s_prime, r, done, info = self._step_wrapper(self._env.step(a))
                 
                 if self._train:
-                    self._net.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), done))
+                    self._algo.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), done))
                     
                 s = s_prime
                 self._score += r
                 if done:
                     break
             if self._train:
-                self._net.train_net()
+                self._algo.train_net()
