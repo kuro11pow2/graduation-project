@@ -10,6 +10,14 @@ class ActorCriticParams:
         self.gamma = gamma
         self.n_rollout = n_rollout
 
+    def __str__(self):
+        s = ''
+        s += f'node={self.n_node}-'
+        s += f'lRate={self.learning_rate}-'
+        s += f'gma={self.gamma}-'
+        s += f'nRoll={self.n_rollout}'
+        return s
+
 class ActorCritic(nn.Module):
     def __init__(self, n_state, n_action, params):
         super(ActorCritic, self).__init__()
@@ -72,3 +80,18 @@ class ActorCritic(nn.Module):
         self.optimizer.zero_grad()
         loss.mean().backward()
         self.optimizer.step()
+
+    def save_net(self, dir, name):
+        torch.save({
+            'net': self.state_dict()
+        }, dir + '/' + name)
+
+    def load_net(self, dir, name):
+        checkpoint = torch.load(dir + '/' + name)
+        self.load_state_dict(checkpoint['net'])
+    
+    def set_train(self):
+        self.train()
+    
+    def set_eval(self):
+        self.eval()
