@@ -13,6 +13,17 @@ class PPOlstmParams:
         self.k_epoch = k_epoch
         self.t_horizon = t_horizon
 
+    def __str__(self):
+        s = ''
+        s += f'node={self.n_node}-'
+        s += f'lRate={self.learning_rate}-'
+        s += f'gma={self.gamma}-'
+        s += f'lmb={self.lmbda}-'
+        s += f'epsclp={self.eps_clip}-'
+        s += f'k={self.k_epoch}-'
+        s += f't={self.t_horizon}'
+        return s
+
 class PPOlstm(nn.Module):
     def __init__(self, n_state, n_action, params):
         super(PPOlstm, self).__init__()
@@ -103,3 +114,18 @@ class PPOlstm(nn.Module):
             self.optimizer.zero_grad()
             loss.mean().backward(retain_graph=True)
             self.optimizer.step()
+
+    def save_net(self, dir, name):
+        torch.save({
+            'net': self.state_dict()
+        }, dir + '/' + name)
+
+    def load_net(self, dir, name):
+        checkpoint = torch.load(dir + '/' + name)
+        self.load_state_dict(checkpoint['net'])
+    
+    def set_train(self):
+        self.train()
+    
+    def set_eval(self):
+        self.eval()
