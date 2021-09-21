@@ -134,10 +134,10 @@ class Runner(metaclass=ABCMeta):
         else:
             return False
 
-    def _save(self, path='./weights'):
+    def _save(self, dir='./weights'):
         try:
-            if not os.path.exists(path):
-                os.makedirs(path)
+            if not os.path.exists(dir):
+                os.makedirs(dir)
             name = f'{self._algo_name}'
             name += f'-{self._env_name}'
             name += f'-{self._end_score}'
@@ -145,12 +145,12 @@ class Runner(metaclass=ABCMeta):
             if self._name_postfix:
                 name += f'-{self._name_postfix}'
             name += f'-{(str(int(time.time())))}.pt'
-            self._algo.save_net(path, name)
+            self._algo.save_net(dir, name)
         except OSError:
             raise
             
-    def _load(self, path='./weights'):
-        self._algo.load_net(path, self._load_name)
+    def _load(self, dir='./weights'):
+        self._algo.load_net(dir, self._load_name)
         self._algo.set_eval()
 
     @abstractmethod
