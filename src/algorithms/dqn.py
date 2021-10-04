@@ -52,7 +52,7 @@ class QNet(nn.Module):
         coin = random.random()
         if coin < epsilon:
             return random.randint(0,1)
-        else : 
+        else: 
             return out.argmax().item()
 
 class DQN:

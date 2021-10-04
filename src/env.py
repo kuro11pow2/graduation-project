@@ -7,7 +7,7 @@ class Env(Enum):
     ACROBOT = 'Acrobot-v1'
     LUNARLANDER = 'LunarLander-v2'
     CARRACING = 'CarRacing-v0'
-    BIPEDALWALKER = 'BipedalWalker-v2'
+    BIPEDALWALKER = 'BipedalWalker-v3'
 
 """
 CARTPOLE
