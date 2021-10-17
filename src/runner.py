@@ -7,6 +7,7 @@ from recorder import Recorder
 from torch.utils.tensorboard import SummaryWriter
 import torch
 
+
 class RunnerParams:
     def __init__(self, *, save_net=False, name_postfix=None, load_net=False, load_name=None, 
                     train=True,  max_episode=10000, interval=20, 
@@ -33,6 +34,7 @@ class RunnerParams:
         s += f'rwdscl={self.reward_scale}'
         return s
 
+
 class Runner(metaclass=ABCMeta):
     def __init__(self, env_name, algo_name, algo_params, runner_params):
         self._env_name = env_name
@@ -52,6 +54,7 @@ class Runner(metaclass=ABCMeta):
         self._reward_scale = runner_params.reward_scale
         self._step_wrapper = runner_params.step_wrapper
         self._score = 0.0
+        self._score_sum = 0.0
         self._end_score = None
         self._env = None
         self._algo = None
@@ -91,28 +94,29 @@ class Runner(metaclass=ABCMeta):
         print('시뮬레이션 시작')
         for n_epi in range(self._max_episode):
             reset_score = n_epi % self._interval == 0
-            if reset_score:
-                self._score = 0.0
 
-            record_video = self._video_record_interval and n_epi % self._video_record_interval == 0
+            if reset_score:
+                self._score_sum = 0.0
+            
+            record_video = self._video_record_interval and (n_epi + 1) % self._video_record_interval == 0
+
             if record_video:
                 self._recorder.record_start()
                 self._episode_sim(n_epi)
-                avg_score = self._score / (n_epi % self._interval + 1)
-                print(f'{n_epi=}, {avg_score=} 비디오 저장')
+                print(f'{n_epi=}, {self._score=} 비디오 저장')
                 self._recorder.record_end()
             else:
                 self._episode_sim(n_epi)
+            
+            if (n_epi + 1) % self._interval == 0:
+                avg_score = self._score_sum / self._interval
+                self._print_log(n_epi, avg_score)
+                self._write_log(n_epi, avg_score)
 
-            avg_score = self._score / (n_epi % self._interval + 1)
-            print_log = n_epi % self._interval == 0
-            if print_log:
-                self._print_log(n_epi)
-
-            if self._is_done(n_epi):
-                print(f'종료 조건 만족. 최종 {self._interval}번 평균 점수 {avg_score}')
-                self._end_score = avg_score
-                break
+                if self._is_done(n_epi, avg_score):
+                    print(f'종료 조건 만족. 최종 {self._interval}번 평균 점수 {avg_score}')
+                    self._end_score = avg_score
+                    break
 
         print('시뮬레이션 종료')
 
@@ -120,13 +124,13 @@ class Runner(metaclass=ABCMeta):
             print('네트워크 저장')
             self._save()
         
-    def _print_log(self, n_epi):
-        avg_score = self._score / (n_epi % self._interval + 1)
+    def _print_log(self, n_epi, avg_score):
         print(f"에피소드: {n_epi}, 평균 점수: {avg_score:.1f}")
+    
+    def _write_log(self, n_epi, avg_score):
         self._writer.add_scalar("score/train", avg_score, n_epi)
     
-    def _is_done(self, n_epi):
-        avg_score = self._score / (n_epi % self._interval + 1)
+    def _is_done(self, n_epi, avg_score):
         if (self._target_score <= avg_score):
             return True
         elif self._recorder.n_recorded >= self._max_video:
