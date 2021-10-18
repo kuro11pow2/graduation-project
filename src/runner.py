@@ -103,12 +103,9 @@ class Runner(metaclass=ABCMeta):
 
         print('시뮬레이션 시작')
         for n_epi in range(self._max_episode):
-            reset_score = n_epi % self._check_interval == 0
-
-            if reset_score:
-                self._score_sum = 0.0
-            
             record_video = self._video_record_interval and (n_epi + 1) % self._video_record_interval == 0
+            print_log = self._print_interval and (n_epi + 1) % self._print_interval == 0
+            cond_check = self._check_interval and (n_epi + 1) % self._check_interval == 0
 
             if record_video:
                 self._recorder.record_start()
@@ -118,17 +115,19 @@ class Runner(metaclass=ABCMeta):
             else:
                 self._episode_sim(n_epi)
 
-            if self._print_interval and (n_epi + 1) % self._print_interval == 0:
+            if print_log:
                 self._print_log(n_epi, self._score)
             
-            if (n_epi + 1) % self._check_interval == 0:
+            if cond_check:
                 avg_score = self._score_sum / self._check_interval
                 self._write_check_log(n_epi, avg_score)
-
+                
                 if self._is_done(n_epi, avg_score):
                     print(f'종료 조건 만족. 최종 {self._check_interval}번 평균 점수 {avg_score}')
                     self._end_score = avg_score
                     break
+                
+                self._score_sum = 0.0
 
         print('시뮬레이션 종료')
 
