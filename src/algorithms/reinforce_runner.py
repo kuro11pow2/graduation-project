@@ -33,7 +33,7 @@ class ReinforceRunner(Runner):
             s_prime, r, done, info = self._step_wrapper(self._env.step(a.item()))
 
             if self._train:
-                self._algo.put_data((r, prob[a]))
+                self._algo.put_data((r/self._reward_scale, prob[a]))
             if self._save_step_log:
                 self._write_step_log(n_step, n_epi, s, a.item(), r, done)
 
