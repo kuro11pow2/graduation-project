@@ -161,7 +161,7 @@ class Runner(metaclass=ABCMeta):
                 os.makedirs(dir)
             name = f'{self._algo_name}'
             name += f'-{self._env_name}'
-            name += f'-{self._end_score}'
+            name += f'-{int(self._end_score)}'
             name += f'-{str(self._runner_params)}'
             if self._name_postfix:
                 name += f'-{self._name_postfix}'
