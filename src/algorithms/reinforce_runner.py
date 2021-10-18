@@ -24,18 +24,23 @@ class ReinforceRunner(Runner):
         s = self._env.reset()
         done = False
         self._score = 0.0
+        n_step = 0
 
         while not done:
             prob = self._algo(torch.from_numpy(s).float())
             m = Categorical(prob)
             a = m.sample()
-            s_prime, r, done, info = self._env.step(a.item())
+            s_prime, r, done, info = self._step_wrapper(self._env.step(a.item()))
 
             if self._train:
                 self._algo.put_data((r, prob[a]))
+            if self._save_step_log:
+                self._write_step_log(n_step, n_epi, s, a.item(), r, done)
 
             s = s_prime
             self._score += r
+            n_step += 1
+            
             if done:
                 break 
         

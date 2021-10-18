@@ -18,10 +18,14 @@ class ActorCriticRunner(Runner):
         n_action = self._env.action_space.n
         self._algo = ActorCritic(n_state, n_action, self._algo_params)
         self._score = 0.0
+        self._score_sum = 0.0
 
     def _episode_sim(self, n_epi):
         s = self._env.reset()
         done = False
+        self._score = 0.0
+        n_step = 0
+
         while not done:
             for t in range(self._algo.n_rollout):
                 prob = self._algo.pi(torch.from_numpy(s).float())
@@ -31,10 +35,17 @@ class ActorCriticRunner(Runner):
 
                 if self._train:
                     self._algo.put_data((s,a,r/self._reward_scale,s_prime,done))
-                
+                if self._save_step_log:
+                    self._write_step_log(n_step, n_epi, s, a, r, done)
+
                 s = s_prime
                 self._score += r
+                n_step += 1
+
                 if done:
-                    break                     
+                    break
+           
             if self._train:
                 self._algo.train_net()
+        
+        self._score_sum += self._score  

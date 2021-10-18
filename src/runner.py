@@ -4,6 +4,7 @@ import time, os
 
 import gym
 from recorder import Recorder
+from logger import Logger
 from torch.utils.tensorboard import SummaryWriter
 import torch
 
@@ -13,7 +14,8 @@ class RunnerParams:
                     train=True,  max_episode=10000, interval=20, 
                     max_video=3, video_record_interval=0,
                     target_score=0, 
-                    reward_scale=1.0, step_wrapper=lambda x: x):
+                    reward_scale=1.0, step_wrapper=lambda x: x,
+                    save_step_log=False):
         self.save_net = save_net
         self.name_postfix = name_postfix
         self.load_net = load_net
@@ -26,6 +28,7 @@ class RunnerParams:
         self.target_score = target_score
         self.reward_scale = reward_scale
         self.step_wrapper = step_wrapper
+        self.save_step_log = save_step_log
     
     def __str__(self):
         s = ''
@@ -53,6 +56,7 @@ class Runner(metaclass=ABCMeta):
         self._target_score = runner_params.target_score
         self._reward_scale = runner_params.reward_scale
         self._step_wrapper = runner_params.step_wrapper
+        self._save_step_log = runner_params.save_step_log
         self._score = 0.0
         self._score_sum = 0.0
         self._end_score = None
@@ -60,6 +64,7 @@ class Runner(metaclass=ABCMeta):
         self._algo = None
         self._recorder = None
         self._writer = None
+        self._logger = None
         
     def run(self):
         env = gym.make(self._env_name)
@@ -67,15 +72,18 @@ class Runner(metaclass=ABCMeta):
         self._env = self._recorder.wrapped_env()
         if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
             raise Exception('discrete space만 지원됨.')
-        name = f'runs/{self._algo_name}'
+        name = f'{self._algo_name}'
         name += f'-{self._env_name}'
         name += f'-{str(self._runner_params)}'
         if self._name_postfix:
             name += f'-{self._name_postfix}'
         name += f'-{(str(int(time.time())))}'
-        self._writer = SummaryWriter(log_dir=name)
+        self._writer = SummaryWriter(log_dir='runs/'+name)
+        self._logger = Logger('logs', name)
         self._episode_loop()
         self._env.close()
+        if self._save_step_log:
+            self._logger.save()
         self._writer.flush()
         self._writer.close()
 
@@ -111,7 +119,7 @@ class Runner(metaclass=ABCMeta):
             if (n_epi + 1) % self._interval == 0:
                 avg_score = self._score_sum / self._interval
                 self._print_log(n_epi, avg_score)
-                self._write_log(n_epi, avg_score)
+                self._write_epi_log(n_epi, avg_score)
 
                 if self._is_done(n_epi, avg_score):
                     print(f'종료 조건 만족. 최종 {self._interval}번 평균 점수 {avg_score}')
@@ -127,8 +135,13 @@ class Runner(metaclass=ABCMeta):
     def _print_log(self, n_epi, avg_score):
         print(f"에피소드: {n_epi}, 평균 점수: {avg_score:.1f}")
     
-    def _write_log(self, n_epi, avg_score):
-        self._writer.add_scalar("score/train", avg_score, n_epi)
+    def _write_epi_log(self, n_epi, avg_score):
+        self._writer.add_scalar("episode/avg_score", avg_score, n_epi)
+
+    def _write_step_log(self, step, n_epi, state, action, reward, done):
+        state = {f'state{i}':n for i, n in enumerate(state)}
+        params = { 'step':step, 'episode':n_epi, 'reward':reward, 'done':done, 'action':action, **state}
+        self._logger.append(params)
     
     def _is_done(self, n_epi, avg_score):
         if (self._target_score <= avg_score):
