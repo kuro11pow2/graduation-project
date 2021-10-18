@@ -123,9 +123,7 @@ class Runner(metaclass=ABCMeta):
             
             if (n_epi + 1) % self._check_interval == 0:
                 avg_score = self._score_sum / self._check_interval
-                
-                if self._save_step_log:
-                    self._write_epi_log(n_epi, avg_score)
+                self._write_check_log(n_epi, avg_score)
 
                 if self._is_done(n_epi, avg_score):
                     print(f'종료 조건 만족. 최종 {self._check_interval}번 평균 점수 {avg_score}')
@@ -141,7 +139,7 @@ class Runner(metaclass=ABCMeta):
     def _print_log(self, n_epi, score):
         print(f"에피소드: {n_epi}, 점수: {score:.1f}")
     
-    def _write_epi_log(self, n_epi, avg_score):
+    def _write_check_log(self, n_epi, avg_score):
         self._writer.add_scalar("episode/avg_score", avg_score, n_epi)
 
     def _write_step_log(self, step, n_epi, state, action, reward, done):
