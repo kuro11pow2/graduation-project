@@ -11,7 +11,7 @@ import torch
 
 class RunnerParams:
     def __init__(self, *, save_net=False, name_postfix=None, load_net=False, load_name=None, 
-                    train=True,  max_episode=10000, interval=20, 
+                    train=True,  max_episode=10000, check_interval=20, print_interval=20,
                     max_video=3, video_record_interval=0,
                     target_score=0, 
                     reward_scale=1.0, step_wrapper=lambda x: x,
@@ -22,7 +22,8 @@ class RunnerParams:
         self.load_name = load_name
         self.train = train
         self.max_episode = max_episode
-        self.interval = interval
+        self.check_interval = check_interval
+        self.print_interval = print_interval
         self.max_video = max_video
         self.video_record_interval = video_record_interval
         self.target_score = target_score
@@ -33,7 +34,7 @@ class RunnerParams:
     def __str__(self):
         s = ''
         s += f'train={self.train}-'
-        s += f'intvl={self.interval}-'
+        s += f'intvl={self.check_interval}-'
         s += f'rwdscl={self.reward_scale}'
         return s
 
@@ -50,7 +51,8 @@ class Runner(metaclass=ABCMeta):
         self._load_name = runner_params.load_name
         self._train = runner_params.train
         self._max_episode = runner_params.max_episode
-        self._interval = runner_params.interval
+        self._check_interval = runner_params.check_interval
+        self._print_interval = runner_params.print_interval
         self._max_video = runner_params.max_video
         self._video_record_interval = runner_params.video_record_interval
         self._target_score = runner_params.target_score
@@ -101,7 +103,7 @@ class Runner(metaclass=ABCMeta):
 
         print('시뮬레이션 시작')
         for n_epi in range(self._max_episode):
-            reset_score = n_epi % self._interval == 0
+            reset_score = n_epi % self._check_interval == 0
 
             if reset_score:
                 self._score_sum = 0.0
@@ -115,14 +117,18 @@ class Runner(metaclass=ABCMeta):
                 self._recorder.record_end()
             else:
                 self._episode_sim(n_epi)
+
+            if self._print_interval and (n_epi + 1) % self._print_interval == 0:
+                self._print_log(n_epi, self._score)
             
-            if (n_epi + 1) % self._interval == 0:
-                avg_score = self._score_sum / self._interval
-                self._print_log(n_epi, avg_score)
-                self._write_epi_log(n_epi, avg_score)
+            if (n_epi + 1) % self._check_interval == 0:
+                avg_score = self._score_sum / self._check_interval
+                
+                if self._save_step_log:
+                    self._write_epi_log(n_epi, avg_score)
 
                 if self._is_done(n_epi, avg_score):
-                    print(f'종료 조건 만족. 최종 {self._interval}번 평균 점수 {avg_score}')
+                    print(f'종료 조건 만족. 최종 {self._check_interval}번 평균 점수 {avg_score}')
                     self._end_score = avg_score
                     break
 
@@ -132,8 +138,8 @@ class Runner(metaclass=ABCMeta):
             print('네트워크 저장')
             self._save()
         
-    def _print_log(self, n_epi, avg_score):
-        print(f"에피소드: {n_epi}, 평균 점수: {avg_score:.1f}")
+    def _print_log(self, n_epi, score):
+        print(f"에피소드: {n_epi}, 점수: {score:.1f}")
     
     def _write_epi_log(self, n_epi, avg_score):
         self._writer.add_scalar("episode/avg_score", avg_score, n_epi)
