@@ -6,7 +6,7 @@ from runner import Runner, RunnerParams
 
 import torch
 
-from reinfoce import Reinforce
+from reinforce import Reinforce
 from torch.distributions import Categorical
 
 class ReinforceRunner(Runner):
