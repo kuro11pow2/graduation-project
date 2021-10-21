@@ -93,12 +93,13 @@ class Runner(metaclass=ABCMeta):
 
     def _episode_loop(self):
         print('초기 설정')
-        self._episode_prepare()
         print(f'algorithm: {self._algo_name}')
         print(f'env: {self._env_name}')
         print(f'state space: {self._env.observation_space.shape}')
         print(f'action space: {self._env.action_space}')
+        self._episode_prepare()
 
+        self._end_score = None
         if self._load_net:
             print('네트워크 불러오기')
             self._load()
@@ -132,8 +133,9 @@ class Runner(metaclass=ABCMeta):
                 self._score_sum = 0.0
 
         print('시뮬레이션 종료')
-
-        if self._save_net:
+        if self._end_score == None:
+            print(f'{self._max_episode} 에피소드 초과하여 종료')
+        elif self._save_net:
             print('네트워크 저장')
             self._save()
         
