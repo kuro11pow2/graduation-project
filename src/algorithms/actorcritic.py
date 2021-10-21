@@ -12,9 +12,9 @@ class ActorCriticParams:
 
     def __str__(self):
         s = ''
-        s += f'node={self.n_node}-'
-        s += f'lRate={self.learning_rate}-'
-        s += f'gma={self.gamma}-'
+        s += f'node={self.n_node}_'
+        s += f'lRate={self.learning_rate}_'
+        s += f'gma={self.gamma}_'
         s += f'nRoll={self.n_rollout}'
         return s
 

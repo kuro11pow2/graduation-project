@@ -11,8 +11,8 @@ class ReinforceParams:
 
     def __str__(self):
         s = ''
-        s += f'node={self.n_node}-'
-        s += f'lRate={self.learning_rate}-'
+        s += f'node={self.n_node}_'
+        s += f'lRate={self.learning_rate}_'
         s += f'gma={self.gamma}'
         return s
 

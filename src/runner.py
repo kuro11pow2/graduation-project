@@ -33,8 +33,8 @@ class RunnerParams:
     
     def __str__(self):
         s = ''
-        s += f'train={self.train}-'
-        s += f'intvl={self.check_interval}-'
+        s += f'train={self.train}_'
+        s += f'intvl={self.check_interval}_'
         s += f'rwdscl={self.reward_scale}'
         return s
 
@@ -77,11 +77,11 @@ class Runner(metaclass=ABCMeta):
         if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
             raise Exception('discrete space만 지원됨.')
         name = f'{self._algo_name}'
-        name += f'-{self._env_name}'
-        name += f'-{str(self._runner_params)}'
+        name += f'_{self._env_name}'
+        name += f'_{str(self._runner_params)}'
         if self._name_postfix:
-            name += f'-{self._name_postfix}'
-        name += f'-{self._id}'
+            name += f'_{self._name_postfix}'
+        name += f'_{self._id}'
         self._writer = SummaryWriter(log_dir='runs/'+name)
         self._logger = Logger('logs', name)
         self._episode_loop()
@@ -161,12 +161,12 @@ class Runner(metaclass=ABCMeta):
             if not os.path.exists(dir):
                 os.makedirs(dir)
             name = f'{self._algo_name}'
-            name += f'-{self._env_name}'
-            name += f'-{int(self._end_score)}'
-            name += f'-{str(self._runner_params)}'
+            name += f'_{self._env_name}'
+            name += f'_{int(self._end_score)}'
+            name += f'_{str(self._runner_params)}'
             if self._name_postfix:
-                name += f'-{self._name_postfix}'
-            name += f'-{self._id}.pt'
+                name += f'_{self._name_postfix}'
+            name += f'_{self._id}.pt'
             self._algo.save_net(dir, name)
         except OSError:
             raise

@@ -19,12 +19,12 @@ class DDQNParams:
 
     def __str__(self):
         s = ''
-        s += f'node={self.n_node}-'
-        s += f'lRate={self.learning_rate}-'
-        s += f'gma={self.gamma}-'
-        s += f'nBuf={self.buffer_limit}-'
-        s += f'nBat={self.batch_size}-'
-        s += f'nStrt={self.n_train_start}-'
+        s += f'node={self.n_node}_'
+        s += f'lRate={self.learning_rate}_'
+        s += f'gma={self.gamma}_'
+        s += f'nBuf={self.buffer_limit}_'
+        s += f'nBat={self.batch_size}_'
+        s += f'nStrt={self.n_train_start}_'
         s += f'updIntvl={self.update_interval}'
         return s
 

@@ -15,12 +15,12 @@ class PPOParams:
     
     def __str__(self):
         s = ''
-        s += f'node={self.n_node}-'
-        s += f'lRate={self.learning_rate}-'
-        s += f'gma={self.gamma}-'
-        s += f'lmb={self.lmbda}-'
-        s += f'epsclp={self.eps_clip}-'
-        s += f'k={self.k_epoch}-'
+        s += f'node={self.n_node}_'
+        s += f'lRate={self.learning_rate}_'
+        s += f'gma={self.gamma}_'
+        s += f'lmb={self.lmbda}_'
+        s += f'epsclp={self.eps_clip}_'
+        s += f'k={self.k_epoch}_'
         s += f't={self.t_horizon}'
         return s
 
