@@ -67,8 +67,10 @@ class Runner(metaclass=ABCMeta):
         self._recorder = None
         self._writer = None
         self._logger = None
+        self._id = None
         
     def run(self):
+        self._id = str(int(time.time()))
         env = gym.make(self._env_name)
         self._recorder = Recorder(env, False)
         self._env = self._recorder.wrapped_env()
@@ -79,7 +81,7 @@ class Runner(metaclass=ABCMeta):
         name += f'-{str(self._runner_params)}'
         if self._name_postfix:
             name += f'-{self._name_postfix}'
-        name += f'-{(str(int(time.time())))}'
+        name += f'-{self._id}'
         self._writer = SummaryWriter(log_dir='runs/'+name)
         self._logger = Logger('logs', name)
         self._episode_loop()
@@ -164,7 +166,7 @@ class Runner(metaclass=ABCMeta):
             name += f'-{str(self._runner_params)}'
             if self._name_postfix:
                 name += f'-{self._name_postfix}'
-            name += f'-{(str(int(time.time())))}.pt'
+            name += f'-{self._id}.pt'
             self._algo.save_net(dir, name)
         except OSError:
             raise
