@@ -72,22 +72,28 @@ class Runner(metaclass=ABCMeta):
     def run(self):
         self._id = str(int(time.time()))
         env = gym.make(self._env_name)
-        self._recorder = Recorder(env, False)
-        self._env = self._recorder.wrapped_env()
-        if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
-            raise Exception('discrete space만 지원됨.')
+
         name = f'{self._algo_name}'
         name += f'_{self._env_name}'
         name += f'_{str(self._runner_params)}'
         if self._name_postfix:
             name += f'_{self._name_postfix}'
         name += f'_{self._id}'
-        self._writer = SummaryWriter(log_dir='runs/'+name)
+
+        self._recorder = Recorder(env, False, f'./videos/{name}')
+        self._env = self._recorder.wrapped_env()
+        if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
+            raise Exception('discrete space만 지원됨.')
+
+        self._writer = SummaryWriter(log_dir=f'runs/{name}')
         self._logger = Logger('logs', name)
+
         self._episode_loop()
         self._env.close()
+
         if self._save_step_log:
             self._logger.save()
+
         self._writer.flush()
         self._writer.close()
 

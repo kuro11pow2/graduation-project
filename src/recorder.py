@@ -5,7 +5,7 @@ class Recorder:
         self._epi_set = set()
         self.n_recorded = 0
         self.video_enable = False
-        self._env = gym.wrappers.Monitor(env, save_dir, force=True, video_callable=lambda x: self.video_enable)
+        self._env = gym.wrappers.Monitor(env, save_dir, force=False, video_callable=lambda x: self.video_enable)
         if not result_window:
             self._disable_window_classic_control()
     
