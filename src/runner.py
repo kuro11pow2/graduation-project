@@ -73,7 +73,7 @@ class Runner(metaclass=ABCMeta):
         
     def run(self):
         self._id = str(int(time.time()))
-        env = gym.make(self._env_name)
+        self._env = gym.make(self._env_name)
 
         name = f'{self._algo_name}'
         name += f'_{self._env_name}'
@@ -82,8 +82,9 @@ class Runner(metaclass=ABCMeta):
             name += f'_{self._name_postfix}'
         name += f'_{self._id}'
 
-        self._recorder = Recorder(env, False, f'./videos/{name}')
-        self._env = self._recorder.wrapped_env()
+        if self._video_record_interval:
+            self._recorder = Recorder(self._env, False, f'./videos/{name}')
+            self._env = self._recorder.wrapped_env()
 
         if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
             raise Exception('discrete space만 지원됨.')
@@ -167,7 +168,7 @@ class Runner(metaclass=ABCMeta):
     def _is_done(self, n_epi, avg_score):
         if (self._target_score <= avg_score):
             return True
-        elif self._recorder.n_recorded >= self._max_video:
+        elif self._video_record_interval and self._recorder.n_recorded >= self._max_video:
             return True
         else:
             return False
