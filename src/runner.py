@@ -15,7 +15,7 @@ class RunnerParams:
                     max_video=3, video_record_interval=0,
                     target_score=0, 
                     reward_scale=1.0, step_wrapper=lambda x: x,
-                    save_step_log=False):
+                    save_step_log=False, save_check_log=True):
         self.save_net = save_net
         self.name_postfix = name_postfix
         self.load_net = load_net
@@ -30,6 +30,7 @@ class RunnerParams:
         self.reward_scale = reward_scale
         self.step_wrapper = step_wrapper
         self.save_step_log = save_step_log
+        self.save_check_log = save_check_log
     
     def __str__(self):
         s = ''
@@ -59,6 +60,7 @@ class Runner(metaclass=ABCMeta):
         self._reward_scale = runner_params.reward_scale
         self._step_wrapper = runner_params.step_wrapper
         self._save_step_log = runner_params.save_step_log
+        self._save_check_log = runner_params.save_check_log
         self._score = 0.0
         self._score_sum = 0.0
         self._end_score = None
@@ -82,10 +84,13 @@ class Runner(metaclass=ABCMeta):
 
         self._recorder = Recorder(env, False, f'./videos/{name}')
         self._env = self._recorder.wrapped_env()
+
         if not isinstance(self._env.action_space, gym.spaces.discrete.Discrete):
             raise Exception('discrete space만 지원됨.')
+            
+        if self._save_check_log:
+            self._writer = SummaryWriter(log_dir=f'runs/{name}')
 
-        self._writer = SummaryWriter(log_dir=f'runs/{name}')
         self._logger = Logger('logs', name)
 
         self._episode_loop()
@@ -94,8 +99,9 @@ class Runner(metaclass=ABCMeta):
         if self._save_step_log:
             self._logger.save()
 
-        self._writer.flush()
-        self._writer.close()
+        if self._save_check_log:
+            self._writer.flush()
+            self._writer.close()
 
     def _episode_loop(self):
         print('초기 설정')
@@ -126,11 +132,13 @@ class Runner(metaclass=ABCMeta):
 
             if print_log:
                 self._print_log(n_epi, self._score)
-            
+        
             if cond_check:
                 avg_score = self._score_sum / self._check_interval
-                self._write_check_log(n_epi, avg_score)
-                
+                    
+                if self._save_check_log:
+                    self._write_check_log(n_epi, avg_score)
+                    
                 if self._is_done(n_epi, avg_score):
                     print(f'종료 조건 만족. 최종 {self._check_interval}번 평균 점수 {avg_score}')
                     self._end_score = avg_score
