@@ -51,42 +51,6 @@ Solved Requirements:
 
 
 
-"""
-MOUNTAIN CAR
-
-Description:
-    에이전트는 계곡 바닥에서 시작한다.
-    주어진 상태에 대해 에이전트는 왼쪽 또는 오른쪽으로 가속하거나, 감속할 수 있다.
-
-Observation:
-    Type: Box(2)
-    Num    Observation               Min            Max
-    0      Car Position              -1.2           0.6
-    1      Car Velocity              -0.07          0.07
-
-Actions:
-    Type: Discrete(3)
-    Num    Action
-    0      Accelerate to the Left
-    1      Don't accelerate
-    2      Accelerate to the Right
-    Note: 중력에 의한 가속과 별개로 작용한다.
-
-Reward:
-    산 정상의 깃발에 닿으면 +0 (위치 = 0.5)
-    위치 < 0.5 이면 -1
-
-Starting State:
-    시작 시점의 차의 위치는 [-0.6 , -0.4]에서 uniform random value 할당
-    시작 시점의 차의 속력은 항상 0
-
-Episode Termination:
-    차 위치가 0.5 이상
-    에피소드 길이가 200 이상
-"""
-
-
-
 
 """
 LUNAR LANDER
@@ -124,3 +88,44 @@ Reward:
 
     200 점 이상이면 해결
 """
+
+
+
+
+
+
+
+"""
+MOUNTAIN CAR
+
+Description:
+    에이전트는 계곡 바닥에서 시작한다.
+    주어진 상태에 대해 에이전트는 왼쪽 또는 오른쪽으로 가속하거나, 감속할 수 있다.
+
+Observation:
+    Type: Box(2)
+    Num    Observation               Min            Max
+    0      Car Position              -1.2           0.6
+    1      Car Velocity              -0.07          0.07
+
+Actions:
+    Type: Discrete(3)
+    Num    Action
+    0      Accelerate to the Left
+    1      Don't accelerate
+    2      Accelerate to the Right
+    Note: 중력에 의한 가속과 별개로 작용한다.
+
+Reward:
+    산 정상의 깃발에 닿으면 +0 (위치 = 0.5)
+    위치 < 0.5 이면 -1
+
+Starting State:
+    시작 시점의 차의 위치는 [-0.6 , -0.4]에서 uniform random value 할당
+    시작 시점의 차의 속력은 항상 0
+
+Episode Termination:
+    차 위치가 0.5 이상
+    에피소드 길이가 200 이상
+"""
+
