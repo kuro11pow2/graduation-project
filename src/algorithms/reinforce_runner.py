@@ -40,9 +40,6 @@ class ReinforceRunner(Runner):
             s = s_prime
             self._score += r
             n_step += 1
-            
-            if done:
-                break 
         
         self._score_sum += self._score 
         if self._train:

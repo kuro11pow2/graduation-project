@@ -27,25 +27,21 @@ class ActorCriticRunner(Runner):
         n_step = 0
 
         while not done:
-            for t in range(self._algo.n_rollout):
-                prob = self._algo.pi(torch.from_numpy(s).float())
-                m = Categorical(prob)
-                a = m.sample().item()
-                s_prime, r, done, info = self._step_wrapper(self._env.step(a))
+            prob = self._algo.pi(torch.from_numpy(s).float())
+            m = Categorical(prob)
+            a = m.sample().item()
+            s_prime, r, done, info = self._step_wrapper(self._env.step(a))
 
-                if self._train:
-                    self._algo.put_data((s,a,r/self._reward_scale,s_prime,done))
-                if self._save_step_log:
-                    self._write_step_log(n_step, n_epi, s, a, r, done)
-
-                s = s_prime
-                self._score += r
-                n_step += 1
-
-                if done:
-                    break
-           
             if self._train:
-                self._algo.train_net()
+                self._algo.put_data((s,a,r/self._reward_scale,s_prime,done))
+            if self._save_step_log:
+                self._write_step_log(n_step, n_epi, s, a, r, done)
+
+            s = s_prime
+            self._score += r
+            n_step += 1
+           
+        if self._train:
+            self._algo.train_net()
         
         self._score_sum += self._score  

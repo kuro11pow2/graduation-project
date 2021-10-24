@@ -107,10 +107,11 @@ class DDQN:
             s,a,r,s_prime,done_mask = self.sample(self.batch_size)
 
             qnet_outs = self.net(s)
-            tnet_outs = self.target_net(s_prime)
+            qnet_prime_outs = self.net(s_prime)
+            tnet_prime_outs = self.target_net(s_prime)
 
-            max_a = torch.max(qnet_outs, 1)[1].unsqueeze(1)
-            q_estimated = tnet_outs.gather(1, max_a)
+            max_a = torch.max(qnet_prime_outs, 1)[1].unsqueeze(1)
+            q_estimated = tnet_prime_outs.gather(1, max_a)
             target = r + self.gamma * q_estimated * done_mask
 
             q_a = qnet_outs.gather(1, a)
