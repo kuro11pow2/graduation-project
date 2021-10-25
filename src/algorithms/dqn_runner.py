@@ -45,11 +45,12 @@ class DQNRunner(Runner):
             self._score += r
             n_step += 1
 
-            if done:
-                break
-            
         self._score_sum += self._score 
-        if self._train:
+
+    def _after_sim(self, n_epi, print_log, cond_check):
+        super()._after_sim(n_epi, print_log, cond_check)
+
+        if not self._done and self._train:
             if self._algo.buffer_size() > self._algo.n_train_start:
                 self._algo.train_net()
             if n_epi % self._algo.update_interval==0:

@@ -37,9 +37,10 @@ class PPOlstmRunner(Runner):
                     self._algo.put_data((s, a, r/self._reward_scale, s_prime, prob[a].item(), h_in, h_out, done))
                 
                 s = s_prime
-
                 self._score += r
+
                 if done:
-                    break
+                    return
+
             if self._train:
                 self._algo.train_net()

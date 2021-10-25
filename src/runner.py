@@ -70,6 +70,7 @@ class Runner(metaclass=ABCMeta):
         self._writer = None
         self._logger = None
         self._id = None
+        self._done = False
             
     def run(self):
         self._init()
@@ -115,8 +116,10 @@ class Runner(metaclass=ABCMeta):
         print(f'env: {self._env_name}')
         print(f'state space: {self._env.observation_space.shape}')
         print(f'action space: {self._env.action_space}')
+
         self._before_sim_loop()
 
+        self._done = False
         self._end_score = None
         if self._load_net:
             print('네트워크 불러오기')
@@ -136,27 +139,15 @@ class Runner(metaclass=ABCMeta):
             else:
                 self._episode_sim(n_epi)
 
-            if print_log:
-                self._print_log(n_epi, self._score)
-        
-            if cond_check:
-                avg_score = self._score_sum / self._check_interval
-                    
-                if self._save_check_log:
-                    self._write_check_log(n_epi, avg_score)
-                    
-                if self._is_done(n_epi, avg_score):
-                    print(f'종료 조건 만족. 최종 {self._check_interval}번 평균 점수 {avg_score}')
-                    self._end_score = avg_score
-                    break
-                
-                self._score_sum = 0.0
+            self._after_sim(n_epi, print_log, cond_check)
 
-        print('시뮬레이션 종료')
+            if self._done == True:
+                break
+
         if self._end_score == None:
             print(f'{self._max_episode} 에피소드 초과하여 종료')
         elif self._save_net:
-            print('네트워크 저장')
+            print('시뮬레이션 종료, 네트워크 저장')
             self._save()
         
     def _print_log(self, n_epi, score):
@@ -196,6 +187,25 @@ class Runner(metaclass=ABCMeta):
     def _load(self, dir='./weights'):
         self._algo.load_net(dir, self._load_name)
         self._algo.set_eval()
+
+    def _after_sim(self, n_epi, print_log, cond_check):
+        if print_log:
+            self._print_log(n_epi, self._score)
+    
+        if not cond_check:
+            return
+
+        avg_score = self._score_sum / self._check_interval
+            
+        if self._save_check_log:
+            self._write_check_log(n_epi, avg_score)
+            
+        if self._is_done(n_epi, avg_score):
+            print(f'종료 조건 만족. 최종 {self._check_interval}번 평균 점수 {avg_score}')
+            self._end_score = avg_score
+            self._done = True
+        else:
+            self._score_sum = 0.0
 
     @abstractmethod
     def _before_sim_loop(self):

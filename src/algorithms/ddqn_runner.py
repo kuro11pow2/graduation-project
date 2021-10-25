@@ -44,17 +44,18 @@ class DDQNRunner(Runner):
             s = s_prime
             self._score += r
             n_step += 1
-
-            if done:
-                break
         
         self._score_sum += self._score 
-        if self._train:
+
+    def _after_sim(self, n_epi, print_log, cond_check):
+        super()._after_sim(n_epi, print_log, cond_check)
+        
+        if not self._done and self._train:
             if self._algo.buffer_size() > self._algo.n_train_start:
                 self._algo.train_net()
             if n_epi % self._algo.update_interval==0:
                 self._algo.update_net()
-
+                
     def _print_log(self, n_epi, avg_score):
         super()._print_log(n_epi, avg_score)
         print(f"n_buffer : {self._algo.buffer_size()}, "\

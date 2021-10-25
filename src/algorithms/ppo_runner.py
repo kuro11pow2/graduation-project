@@ -34,7 +34,9 @@ class PPORunner(Runner):
                     
                 s = s_prime
                 self._score += r
+
                 if done:
-                    break
+                    return
+                    
             if self._train:
                 self._algo.train_net()
