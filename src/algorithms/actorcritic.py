@@ -13,7 +13,7 @@ class ActorCriticParams:
         s = ''
         s += f'node={self.n_node}_'
         s += f'lRate={self.learning_rate}_'
-        s += f'gma={self.gamma}_'
+        s += f'gma={self.gamma}'
         return s
 
 class ActorCritic(nn.Module):
