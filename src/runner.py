@@ -70,8 +70,13 @@ class Runner(metaclass=ABCMeta):
         self._writer = None
         self._logger = None
         self._id = None
-        
+            
     def run(self):
+        self._init()
+        self._episode_loop()
+        self._finish()
+
+    def _init(self):
         self._id = str(int(time.time()))
         self._env = gym.make(self._env_name)
 
@@ -94,7 +99,7 @@ class Runner(metaclass=ABCMeta):
 
         self._logger = Logger('logs', name)
 
-        self._episode_loop()
+    def _finish(self):
         self._env.close()
 
         if self._save_step_log:
@@ -110,7 +115,7 @@ class Runner(metaclass=ABCMeta):
         print(f'env: {self._env_name}')
         print(f'state space: {self._env.observation_space.shape}')
         print(f'action space: {self._env.action_space}')
-        self._episode_prepare()
+        self._before_sim_loop()
 
         self._end_score = None
         if self._load_net:
@@ -121,7 +126,7 @@ class Runner(metaclass=ABCMeta):
         for n_epi in range(self._max_episode):
             record_video = self._video_record_interval and (n_epi + 1) % self._video_record_interval == 0
             print_log = self._print_interval and (n_epi + 1) % self._print_interval == 0
-            cond_check = self._check_interval and (n_epi + 1) % self._check_interval == 0
+            cond_check = (n_epi + 1) % self._check_interval == 0
 
             if record_video:
                 self._recorder.record_start()
@@ -193,7 +198,7 @@ class Runner(metaclass=ABCMeta):
         self._algo.set_eval()
 
     @abstractmethod
-    def _episode_prepare(self):
+    def _before_sim_loop(self):
         pass
 
     @abstractmethod

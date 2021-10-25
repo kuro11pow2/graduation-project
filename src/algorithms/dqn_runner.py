@@ -13,7 +13,7 @@ class DQNRunner(Runner):
     def __init__(self, env_name, algo_params, runner_params):
         super(DQNRunner, self).__init__(env_name, 'DQN', algo_params, runner_params)
 
-    def _episode_prepare(self):
+    def _before_sim_loop(self):
         n_state = self._env.observation_space.shape[0]
         n_action = self._env.action_space.n
         self._algo = DQN(n_state, n_action, self._algo_params)
