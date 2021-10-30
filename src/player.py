@@ -8,7 +8,7 @@ class Player:
         self.path = path
         self.model_names = model_names
 
-    def run(self, debug=False):
+    def run(self, runner_param_dic=None, debug=False):
         cases = []
         for name in self.model_names:
             tokens = name.split('_')
@@ -39,6 +39,8 @@ class Player:
                                         load_name=load_name, name_postfix=str(algop), 
                                         check_interval=1, max_video=0, save_check_log=False, save_step_log=True,
                                         print_interval=0, video_record_interval=0, max_episode=1000)
+            runner_param_tmp = {**runnerp.__dict__, **runner_param_dic}
+            runnerp = RunnerParams(**runner_param_tmp)
 
             runner(env, algop, runnerp).run()
         

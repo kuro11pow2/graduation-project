@@ -74,10 +74,11 @@ class Trainer:
             if debug:
                 runnerp = RunnerParams(save_net=True, max_video=1000, video_record_interval=self._check_intervals, 
                                             print_interval=self._check_intervals)
-            elif runner_param_dic == None:
-                runnerp = RunnerParams(save_net=True, video_record_interval=0, print_interval=0)
             else:
-                runnerp = RunnerParams(**runner_param_dic)
+                runnerp = RunnerParams(save_net=True, video_record_interval=0, print_interval=0)
+
+            runner_param_tmp = {**runnerp.__dict__, **runner_param_dic}
+            runnerp = RunnerParams(**runner_param_tmp)
 
             runnerp.check_interval = check_interval
 
