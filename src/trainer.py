@@ -68,7 +68,7 @@ class Trainer:
 
         self._testcases += [(env, algo_runner, algo_param)]
 
-    def run(self, runner_param_dic=None, debug=False):
+    def run(self, runner_param_dic=dict(), debug=False):
         for check_interval in self._check_intervals:
             runnerp = None
             if debug:

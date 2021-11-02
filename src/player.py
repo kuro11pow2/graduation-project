@@ -8,7 +8,7 @@ class Player:
         self.path = path
         self.model_names = model_names
 
-    def run(self, runner_param_dic=None, debug=False):
+    def run(self, runner_param_dic=dict(), debug=False):
         cases = []
         for name in self.model_names:
             tokens = name.split('_')
