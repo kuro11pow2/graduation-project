@@ -49,9 +49,8 @@ class QNet(nn.Module):
       
     def sample_action(self, obs, epsilon):
         out = self.forward(obs)
-        coin = random.random()
-        if coin < epsilon:
-            return random.randint(0,1)
+        if random.random() < epsilon:
+            return random.randint(self.n_action)
         else: 
             return out.argmax().item()
 
