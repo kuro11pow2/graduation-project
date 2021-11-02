@@ -50,7 +50,7 @@ class QNet(nn.Module):
     def sample_action(self, obs, epsilon):
         out = self.forward(obs)
         if random.random() < epsilon:
-            return random.randint(self.n_action)
+            return random.randrange(self.n_action)
         else: 
             return out.argmax().item()
 
