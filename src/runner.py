@@ -7,6 +7,8 @@ from recorder import Recorder
 from logger import Logger
 from torch.utils.tensorboard import SummaryWriter
 import torch
+import numpy as np
+import random
 
 
 class RunnerParams:
@@ -15,7 +17,8 @@ class RunnerParams:
                     max_video=3, video_record_interval=0,
                     target_score=0, 
                     reward_scale=1.0, step_wrapper=lambda x: x,
-                    save_step_log=False, save_check_log=True):
+                    save_step_log=False, save_check_log=True,
+                    seed=1913):
         self.save_net = save_net
         self.name_postfix = name_postfix
         self.load_net = load_net
@@ -31,12 +34,14 @@ class RunnerParams:
         self.step_wrapper = step_wrapper
         self.save_step_log = save_step_log
         self.save_check_log = save_check_log
+        self.seed = seed
     
     def __str__(self):
         s = ''
         s += f'train={self.train}_'
         s += f'intvl={self.check_interval}_'
         s += f'rwdscl={self.reward_scale}'
+        # seed도 저장할 수 있도록 수정해야 함.
         return s
 
 
@@ -61,6 +66,7 @@ class Runner(metaclass=ABCMeta):
         self._step_wrapper = runner_params.step_wrapper
         self._save_step_log = runner_params.save_step_log
         self._save_check_log = runner_params.save_check_log
+        self._seed = runner_params.seed
         self._score = 0.0
         self._score_sum = 0.0
         self._end_score = None
@@ -78,8 +84,17 @@ class Runner(metaclass=ABCMeta):
         self._finish()
 
     def _init(self):
+        torch.manual_seed(self._seed)
+        torch.cuda.manual_seed(self._seed)
+        torch.cuda.manual_seed_all(self._seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        np.random.seed(self._seed)
+        random.seed(self._seed)
+
         self._id = str(int(time.time()))
         self._env = gym.make(self._env_name)
+        self._env.seed(self._seed)
 
         name = f'{self._algo_name}'
         name += f'_{self._env_name}'
