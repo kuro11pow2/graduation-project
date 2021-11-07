@@ -31,7 +31,7 @@ class ActorCritic(nn.Module):
         self.fc_v = nn.Linear(self.n_node,1)
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         
-    def pi(self, x, softmax_dim = 0):
+    def pi(self, x, softmax_dim = 0): # forward로 변경?
         x = F.relu(self.fc1(x))
         x = self.fc_pi(x)
         prob = F.softmax(x, dim=softmax_dim)
